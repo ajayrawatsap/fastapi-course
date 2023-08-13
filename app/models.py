@@ -1,5 +1,7 @@
 from .database import Base
-from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, text
+from sqlalchemy import (TIMESTAMP, Boolean, Column,
+                        ForeignKey, Integer, String, text)
+from sqlalchemy.orm import relationship
 
 
 class Post(Base):
@@ -11,6 +13,11 @@ class Post(Base):
     published = Column(Boolean, server_default="TRUE", nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    owner_id = Column(Integer, ForeignKey(
+        "users.id", ondelete='CASCADE'), nullable=False)
+
+#   fetch USER data for post automatically based on user logged in
+    owner = relationship('User')
 
 
 class User(Base):
