@@ -1,12 +1,17 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
+from .config import settings
 
-SQLALCHEMY_DB_URL = 'postgresql://postgres:ajay123@localhost/fastapi'
+SQLALCHEMY_DB_URL = (f'postgresql://'
+                     f'{settings.database_username}:{settings.database_password}'
+                     f'@{settings.database_hostname}:{settings.database_port}'
+                     f'/{settings.database_name}')
 
 engine = create_engine(SQLALCHEMY_DB_URL)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 

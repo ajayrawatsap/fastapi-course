@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 .vscode/settings.json
 notes_fast_api.txt
+playground.py
