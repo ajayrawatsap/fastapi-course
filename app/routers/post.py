@@ -4,17 +4,30 @@ from .. database import get_db
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 router = APIRouter(
     tags=["Posts"]  # to group it in swagger docs
 )
 
 
-@router.get("/posts", response_model=List[schemas.Post])
+# @router.get("/posts", response_model=List[schemas.Post])
+
+@router.get("/posts", response_model=List[schemas.PostOut])
 def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user), limit: int = None, skip: int = 0, search: Optional[str] = ""):
 
+    # posts = (
+    #     db.query(models.Post).
+    #     filter(models.Post.owner_id == current_user.id).
+    #     filter(models.Post.title.contains(search)).
+    #     limit(limit).
+    #     offset(skip).
+    #     all()
+    # )
     posts = (
-        db.query(models.Post).
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes")).
+        join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).
+        group_by(models.Post.id).
         filter(models.Post.owner_id == current_user.id).
         filter(models.Post.title.contains(search)).
         limit(limit).
@@ -22,7 +35,11 @@ def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends
         all()
     )
 
-    return posts
+    # The join returns lits of tuple need to convert in list of dict
+    posts_new = [{"Post": post, "votes": votes}
+                 for post, votes in posts]
+
+    return posts_new
 
 
 @router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
@@ -35,15 +52,21 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
     return new_post
 
 
-@router.get("/post/{id}", response_model=schemas.Post)
+@router.get("/post/{id}", response_model=schemas.PostOut)
 def get_post(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    post = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes")).
+        join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).
+        group_by(models.Post.id).
+        filter(models.Post.id == id).first()
+
+    )
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Post with is {id} not found')
-    if post.owner_id != current_user.id:
+    if post[0].owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f'Not Authorized to perform Requested Action')
     return post

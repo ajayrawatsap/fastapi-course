@@ -44,7 +44,7 @@ def test_get_posts_for_user_sucesfully(test_user, test_post, authorized_client):
     assert len(result) == 2
 
     for post in result:
-        assert post['owner']['id'] == test_user['id']
+        assert post['Post']['owner']['id'] == test_user['id']
 
     assert res.status_code == status.HTTP_200_OK
 
@@ -67,10 +67,10 @@ def test_get_one_post_succesfully(test_user, test_post, authorized_client, sessi
 
     res = authorized_client.get(f"/post/{ post_test_user.id}")
 
-    post_out = schemas.Post(**res.json())
+    post_out = schemas.PostOut(**res.json())
 
     assert res.status_code == status.HTTP_200_OK
-    assert post_test_user.owner_id == post_out.owner.id
+    assert post_test_user.owner_id == post_out.Post.owner.id
 
 
 def test_get_one_post_for_other_user_fail(test_post, authorized_client):
