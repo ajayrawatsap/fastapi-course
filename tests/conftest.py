@@ -113,7 +113,7 @@ def test_post(test_user: dict, test_user2: dict,
     }
 
     post1 = create_post(session, new_post1)
-    posts['post1'] = post1
+    posts['post1_user1'] = post1
 
     new_post2 = {
         "title": "New Post 2 For Test",
@@ -123,7 +123,7 @@ def test_post(test_user: dict, test_user2: dict,
     }
 
     post2 = create_post(session, new_post2)
-    posts['post2'] = post2
+    posts['post2_user1'] = post2
 
     new_post3 = {
         "title": "New Post 3 For Test",
@@ -133,8 +133,6 @@ def test_post(test_user: dict, test_user2: dict,
     }
 
     post3 = create_post(session, new_post3)
-    posts['post3'] = post3
-
-    # posts = session.query(models.Post).all()
+    posts['post_user2'] = post3
 
     return posts

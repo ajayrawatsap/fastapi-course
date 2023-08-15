@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import status
 from app import schemas, models
-from . conftest import create_post
 
 
 def test_create_post_sucessfull(test_user, authorized_client):
@@ -22,8 +21,7 @@ def test_create_post_sucessfull(test_user, authorized_client):
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_create_post_unauthorized(test_user, client):
-    # create_authorized_user("testpost@gmail.com", "pass123", session)
+def test_create_post_unauthorized(client):
 
     new_post = {
         "title": "New Post For Test",
@@ -65,52 +63,28 @@ def test_get_one_post_succesfully(test_user, test_post, authorized_client, sessi
     Retreive a single post created by a user    
     """
 
-    # new_post1 = {
-    #     "title": "New Post 1 For Test",
-    #     "content": "Post 1Created For Testing",
-    #     "published": True,
-    #     "owner_id": test_user['id']
-    # }
+    post_test_user = test_post["post1_user1"]
 
-    # print(test_post)
-    post_new = test_post["post1"]
-
-    res = authorized_client.get(f"/post/{ post_new.id}")
+    res = authorized_client.get(f"/post/{ post_test_user.id}")
 
     post_out = schemas.Post(**res.json())
 
     assert res.status_code == status.HTTP_200_OK
-    assert post_new.owner_id == post_out.owner.id
+    assert post_test_user.owner_id == post_out.owner.id
 
 
-def test_get_one_post_for_other_user_fail(test_user, test_user2, authorized_client, session):
+def test_get_one_post_for_other_user_fail(test_post, authorized_client):
     """
     User should not get post for other user
     """
 
-    new_post1 = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
+    post_test_user2 = test_post["post_user2"]
 
-    post_new1 = create_post(session, new_post1)
-
-    new_post2 = {
-        "title": "New Post 2 For User 2",
-        "content": "Post 1Created For Testing",
-        "published": True,
-        "owner_id": test_user2['id']
-    }
-
-    post_new2 = create_post(session, new_post2)
-
-    res = authorized_client.get(f"/post/{ post_new2.id}")
+    res = authorized_client.get(f"/post/{ post_test_user2.id}")
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_one_post_do_not_exist(test_user, authorized_client):
+def test_get_one_post_do_not_exist(authorized_client):
     """
     User cannot get a post which do not exist
     """
@@ -118,83 +92,46 @@ def test_get_one_post_do_not_exist(test_user, authorized_client):
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_one_post_unauthorized(test_user, client, session):
+def test_get_one_post_unauthorized(test_post, client):
     """
     Unautorized user cannot get a post
     """
-    new_post1 = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
 
-    post_new1 = create_post(session, new_post1)
-    res = client.get(f"/post/{post_new1.id}")
+    post_test_user = test_post["post1_user1"]
+    res = client.get(f"/post/{post_test_user.id}")
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_delete_post_success(test_user, authorized_client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
+def test_delete_post_success(test_post, authorized_client):
 
-    post_new = create_post(session, new_post)
-    res = authorized_client.delete(f"/post/{ post_new.id}")
+    post_test_user = test_post["post1_user1"]
+
+    res = authorized_client.delete(f"/post/{ post_test_user.id}")
     assert res.status_code == status.HTTP_204_NO_CONTENT
 
 
-def test_delete_post_unathorized(test_user, client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
+def test_delete_post_unathorized(test_post, client):
 
-    post_new = create_post(session, new_post)
-    res = client.delete(f"/post/{ post_new.id}")
+    post_test_user = test_post["post1_user1"]
+    res = client.delete(f"/post/{ post_test_user.id}")
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_delete_post_not_exists_fail(test_user, authorized_client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
+def test_delete_post_not_exists_fail(authorized_client):
 
-    post_new = create_post(session, new_post)
     res = authorized_client.delete(f"/post/{99999}")
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_delete_post_for_other_user_fail(test_user, test_user2, authorized_client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user2['id']
-    }
+def test_delete_post_for_other_user_fail(test_post, authorized_client):
 
-    post_new = create_post(session, new_post)
-    res = authorized_client.delete(f"/post/{post_new.id}")
+    post_test_user2 = test_post["post_user2"]
+    res = authorized_client.delete(f"/post/{post_test_user2.id}")
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_update_post_success(test_user, authorized_client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
-
-    post_new = create_post(session, new_post)
+def test_update_post_success(test_post, authorized_client):
+    post_test_user = test_post["post1_user1"]
 
     updated_post = {
         "title": "Updated Title",
@@ -202,7 +139,8 @@ def test_update_post_success(test_user, authorized_client, session):
         "published": False
     }
 
-    res = authorized_client.put(f"/post/{ post_new.id}", json=updated_post)
+    res = authorized_client.put(
+        f"/post/{ post_test_user.id}", json=updated_post)
 
     updated_post_resp = schemas.Post(**res.json())
     assert updated_post_resp.title == updated_post["title"]
@@ -211,15 +149,8 @@ def test_update_post_success(test_user, authorized_client, session):
     assert res.status_code == status.HTTP_200_OK
 
 
-def test_update_post_unauthorized(test_user, client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user['id']
-    }
-
-    post_new = create_post(session, new_post)
+def test_update_post_unauthorized(test_post, client):
+    post_test_user = test_post["post1_user1"]
 
     updated_post = {
         "title": "Updated Title",
@@ -227,11 +158,11 @@ def test_update_post_unauthorized(test_user, client, session):
         "published": False
     }
 
-    res = client.put(f"/post/{ post_new.id}", json=updated_post)
+    res = client.put(f"/post/{ post_test_user.id}", json=updated_post)
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_update_post_do_not_exist_fail(test_user, authorized_client, session):
+def test_update_post_do_not_exist_fail(authorized_client):
 
     updated_post = {
         "title": "Updated Title",
@@ -243,15 +174,8 @@ def test_update_post_do_not_exist_fail(test_user, authorized_client, session):
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_update_post_for_other_user_fail(test_user, test_user2, authorized_client, session):
-    new_post = {
-        "title": "New Post 1 For User 1",
-        "content": "Post 1 Created For Testing",
-        "published": True,
-        "owner_id": test_user2['id']
-    }
-
-    post_new = create_post(session, new_post)
+def test_update_post_for_other_user_fail(test_post, authorized_client):
+    post_test_user2 = test_post["post_user2"]
 
     updated_post = {
         "title": "Updated Title",
@@ -259,6 +183,7 @@ def test_update_post_for_other_user_fail(test_user, test_user2, authorized_clien
         "published": False
     }
 
-    res = authorized_client.put(f"/post/{ post_new.id}", json=updated_post)
+    res = authorized_client.put(
+        f"/post/{ post_test_user2.id}", json=updated_post)
 
     assert res.status_code == status.HTTP_403_FORBIDDEN
