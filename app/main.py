@@ -9,7 +9,7 @@ from .config import settings
 
 # Creates all tables if they do not exists. Can be commented if
 # you want to use alembic and not generate it automtically
-# models.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
