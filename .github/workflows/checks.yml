@@ -22,10 +22,8 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: fastapi123
-          POSTGRES_DB: fastapi
-        env:
-          POSTGRES_PASSWORD: fastapi123          
-          POSTGRES_DB: fastapi_test
+          POSTGRES_DATABASES: fastapi, fastapi_test
+        
         ports:
           - 5432:5432
         options: >-
