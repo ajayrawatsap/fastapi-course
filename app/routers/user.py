@@ -4,7 +4,7 @@ from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 
 router = APIRouter(
-    tags=["Users"]  # to group it in swagger docs
+    tags=["Users2"]  # to group it in swagger docs
 )
 
 
