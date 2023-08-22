@@ -21,9 +21,10 @@ jobs:
       postgres:
         image: postgres
         env:
+          POSTGRES_MULTIPLE_DATABASES: fastapi,fastapi_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: fastapi123
-          POSTGRES_MULTIPLE_DATABASES: fastapi,fastapi_test
+          
         
         ports:
           - 5432:5432
