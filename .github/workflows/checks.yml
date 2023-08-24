@@ -50,7 +50,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: test
         run: |          
-          pytest -v -s -x
+          pytest
       
 
 

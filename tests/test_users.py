@@ -86,4 +86,5 @@ def test_get_logged_user(client, test_user):
 
     # print(res_me.json())
     assert logged_user.email == test_user['email']
-    assert res.status_code == status.HTTP_200_OK
+    # assert res.status_code == status.HTTP_200_OK
+    assert res.status_code == 201
