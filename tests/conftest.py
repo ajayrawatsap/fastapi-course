@@ -7,6 +7,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from app.main import app
+
 from sqlalchemy import create_engine
 from app.config import settings
 from sqlalchemy.orm import sessionmaker
@@ -14,6 +15,7 @@ from app.database import get_db, Base
 from app import models, schemas
 from app.oauth2 import create_access_token
 from typing import Dict
+
 
 SQLALCHEMY_DB_URL = (f'postgresql://'
                      f'{settings.database_username}:{settings.database_password}'
